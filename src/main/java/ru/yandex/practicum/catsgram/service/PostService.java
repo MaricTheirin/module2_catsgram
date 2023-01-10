@@ -2,19 +2,22 @@ package ru.yandex.practicum.catsgram.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.catsgram.exception.PostNotFoundException;
 import ru.yandex.practicum.catsgram.exception.UserNotExistException;
 import ru.yandex.practicum.catsgram.model.Post;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class PostService {
-    private final List<Post> posts = new ArrayList<>();
+    private final Map<Integer, Post> posts = new HashMap<>();
     private final UserService userService;
 
     public List<Post> findAll() {
-        return posts;
+        return new ArrayList<>(posts.values());
     }
 
     @Autowired
@@ -26,7 +29,15 @@ public class PostService {
         if (userService.findUserByEmail(post.getAuthor()) == null) {
             throw new UserNotExistException("Пользователь " + post.getAuthor() + " не найден");
         }
-        posts.add(post);
+        post.setId(posts.size() + 1);
+        posts.put(post.getId(), post);
         return post;
+    }
+
+    public Post getPostById(Integer id) {
+        if (posts.containsKey(id)) {
+            return posts.get(id);
+        }
+        throw new PostNotFoundException("Пост с ID = " + id + " не найден");
     }
 }
