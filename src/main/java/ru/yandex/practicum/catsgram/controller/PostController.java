@@ -17,13 +17,28 @@ public class PostController {
     }
 
     @GetMapping("/posts")
-    public List<Post> findAll() {
-        return postService.findAll();
+    public List<Post> findAll(
+            @RequestParam(required = false, defaultValue = "asc", name = "sort") String sortingOrder,
+            @RequestParam(required = false, defaultValue = "5") Integer size,
+            @RequestParam(required = false, defaultValue = "1") Integer page
+
+    ) {
+        if (!sortingOrder.equals("asc") && !sortingOrder.equals("desc")) {
+            throw new IllegalArgumentException("Некорректно задан параметр сортировки");
+        }
+        if (size <= 0) {
+            throw new IllegalArgumentException("Некорректно задан параметр size");
+        }
+        if (page < 0) {
+            throw new IllegalArgumentException("Некорректно задан параметр page");
+        }
+
+        return postService.findAll(sortingOrder, size, page);
     }
 
     @GetMapping("/posts/{id}")
     public Post getPostById(@PathVariable Integer id) {
-        return postService.getPostById(id);
+        return postService.findPostById(id);
     }
 
     @PostMapping(value = "/post")

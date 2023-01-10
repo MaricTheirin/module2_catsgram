@@ -6,18 +6,28 @@ import ru.yandex.practicum.catsgram.exception.PostNotFoundException;
 import ru.yandex.practicum.catsgram.exception.UserNotExistException;
 import ru.yandex.practicum.catsgram.model.Post;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Service
 public class PostService {
     private final Map<Integer, Post> posts = new HashMap<>();
     private final UserService userService;
 
-    public List<Post> findAll() {
-        return new ArrayList<>(posts.values());
+    public List<Post> findAll(String sortingOrder, Integer size, Integer page) {
+        Comparator<Post> comparator = (p1, p2) -> {
+            int compare = p1.getCreationDate().compareTo(p2.getCreationDate());
+            if (sortingOrder.equals("desc")) {
+                compare *= -1;
+            }
+            return compare;
+        };
+        return posts.values().stream()
+                .sorted(comparator)
+                .skip((page - 1) * size)
+                .limit(size)
+                .collect(Collectors.toList());
     }
 
     @Autowired
@@ -34,7 +44,7 @@ public class PostService {
         return post;
     }
 
-    public Post getPostById(Integer id) {
+    public Post findPostById(Integer id) {
         if (posts.containsKey(id)) {
             return posts.get(id);
         }
