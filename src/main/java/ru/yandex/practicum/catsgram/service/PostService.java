@@ -5,9 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.catsgram.exception.PostNotFoundException;
 import ru.yandex.practicum.catsgram.exception.UserNotExistException;
 import ru.yandex.practicum.catsgram.model.Post;
-
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -15,24 +13,26 @@ public class PostService {
     private final Map<Integer, Post> posts = new HashMap<>();
     private final UserService userService;
 
+    @Autowired
+    public PostService(UserService userService) {
+        this.userService = userService;
+    }
+
     public List<Post> findAll(String sortingOrder, Integer size, Integer page) {
-        Comparator<Post> comparator = (p1, p2) -> {
-            int compare = p1.getCreationDate().compareTo(p2.getCreationDate());
-            if (sortingOrder.equals("desc")) {
-                compare *= -1;
-            }
-            return compare;
-        };
+
         return posts.values().stream()
-                .sorted(comparator)
+                .sorted(getCreationDateComparator((sortingOrder)))
                 .skip((page - 1) * size)
                 .limit(size)
                 .collect(Collectors.toList());
     }
 
-    @Autowired
-    public PostService(UserService userService) {
-        this.userService = userService;
+    public List<Post> findAllByUserEmail(String email, String sortingOrder, Integer size) {
+        return posts.values().stream()
+                .filter(post -> post.getAuthor().equals(email))
+                .sorted(getCreationDateComparator(sortingOrder))
+                .limit(size)
+                .collect(Collectors.toList());
     }
 
     public Post create(Post post) {
@@ -49,5 +49,9 @@ public class PostService {
             return posts.get(id);
         }
         throw new PostNotFoundException("Пост с ID = " + id + " не найден");
+    }
+
+    private Comparator<Post> getCreationDateComparator(String sortingOrder) {
+        return (p1, p2) -> p1.getCreationDate().compareTo(p2.getCreationDate()) * (sortingOrder.equals("desc") ? -1 : 1);
     }
 }
