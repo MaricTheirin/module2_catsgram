@@ -18,8 +18,8 @@ public class PostController {
 
     @GetMapping("/posts")
     public List<Post> findAll(
-            @RequestParam(required = false, defaultValue = "asc", name = "sort") String sortingOrder,
-            @RequestParam(required = false, defaultValue = "5") Integer size,
+            @RequestParam(required = false, defaultValue = "desc", name = "sort") String sortingOrder,
+            @RequestParam(required = false, defaultValue = "10") Integer size,
             @RequestParam(required = false, defaultValue = "1") Integer page
 
     ) {
