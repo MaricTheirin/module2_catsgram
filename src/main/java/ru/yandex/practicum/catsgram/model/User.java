@@ -8,6 +8,29 @@ public class User {
     private String nickname;
     private LocalDate birthdate;
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public LocalDate getBirthdate() {
+        return birthdate;
+    }
+
+    public void setBirthdate(LocalDate birthdate) {
+        this.birthdate = birthdate;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -20,17 +43,5 @@ public class User {
     @Override
     public int hashCode() {
         return Objects.hash(email);
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getNickname() {
-        return nickname;
-    }
-
-    public LocalDate getBirthdate() {
-        return birthdate;
     }
 }

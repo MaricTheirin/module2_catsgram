@@ -1,48 +1,48 @@
 package ru.yandex.practicum.catsgram.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.catsgram.model.Post;
 import ru.yandex.practicum.catsgram.service.PostService;
 
 import java.util.List;
 
+import static ru.yandex.practicum.catsgram.Constants.DESCENDING_ORDER;
+import static ru.yandex.practicum.catsgram.Constants.SORTS;
+
 @RestController
 public class PostController {
     private final PostService postService;
 
-    @Autowired
     public PostController(PostService postService) {
         this.postService = postService;
     }
 
     @GetMapping("/posts")
     public List<Post> findAll(
-            @RequestParam(required = false, defaultValue = "desc", name = "sort") String sortingOrder,
-            @RequestParam(required = false, defaultValue = "10") Integer size,
-            @RequestParam(required = false, defaultValue = "1") Integer page
-
+            @RequestParam(defaultValue = "0", required = false) Integer page,
+            @RequestParam(defaultValue = "10", required = false) Integer size,
+            @RequestParam(defaultValue = DESCENDING_ORDER, required = false) String sort
     ) {
-        if (!sortingOrder.equals("asc") && !sortingOrder.equals("desc")) {
-            throw new IllegalArgumentException("Некорректно задан параметр сортировки");
-        }
-        if (size <= 0) {
-            throw new IllegalArgumentException("Некорректно задан параметр size");
-        }
-        if (page < 0) {
-            throw new IllegalArgumentException("Некорректно задан параметр page");
+        if (!SORTS.contains(sort) || page < 0 || size <= 0) {
+            throw new IllegalArgumentException();
         }
 
-        return postService.findAll(sortingOrder, size, page);
-    }
-
-    @GetMapping("/posts/{id}")
-    public Post getPostById(@PathVariable Integer id) {
-        return postService.findPostById(id);
+        Integer from = page * size;
+        return postService.findAll(size, from, sort);
     }
 
     @PostMapping(value = "/post")
     public Post create(@RequestBody Post post) {
         return postService.create(post);
+    }
+
+    @GetMapping("/post/{postId}")
+    public Post findPost(@PathVariable("postId") Integer postId) {
+        return postService.findPostById(postId);
     }
 }
